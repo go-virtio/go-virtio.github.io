@@ -1,0 +1,77 @@
+{{/*
+  mesh.html — animated SVG visualisation of the go-virtio stack.
+  Reads its data from site.Data.mesh (see data/mesh.toml).
+
+  Render order (back to front) :
+
+    1. Containers — layer rectangles ("drivers", "common", "host").
+    2. Edges — straight lines between nodes.
+    3. Nodes — halo + core circles, kind-driven colour.
+    4. Spheres — animateMotion-driven, glow-filtered.
+
+  go-virtio's stack metaphor : a thin "Transport interface" runs
+  horizontally between spec-level drivers (top) and host backplane
+  (bottom). Common's role is to be the single waist.
+
+  All colours come from CSS variables defined in
+  static/css/main.css ; this template doesn't bake RGB values.
+*/}}
+<div class="mesh" aria-label="{{ .Site.Params.brand }} stack">
+  <svg viewBox="-40 0 1240 540" preserveAspectRatio="xMidYMid meet" role="img">
+    <defs>
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="5" result="b"/>
+        <feMerge>
+          <feMergeNode in="b"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+
+    {{ with .Site.Data.mesh.containers }}
+      <g class="containers">
+        {{ range . }}
+          <rect class="container-{{ .kind }}"
+                x="{{ .x }}" y="{{ .y }}"
+                width="{{ .w }}" height="{{ .h }}"
+                rx="10" ry="10"/>
+          {{ if .label }}
+            <text class="container-label container-label-{{ .kind }}"
+                  x="{{ .lx }}" y="{{ .ly }}">{{ .label }}</text>
+          {{ end }}
+        {{ end }}
+      </g>
+    {{ end }}
+
+    <g class="edges">
+      {{ range .Site.Data.mesh.edges }}
+        <line class="edge{{ if .highlight }} hi{{ end }}{{ with .kind }} kind-{{ . }}{{ end }}"
+              x1="{{ .x1 }}" y1="{{ .y1 }}" x2="{{ .x2 }}" y2="{{ .y2 }}"/>
+      {{ end }}
+    </g>
+
+    <g class="nodes">
+      {{ range .Site.Data.mesh.nodes }}
+        <g transform="translate({{ .x }},{{ .y }})" class="kind-{{ .kind }}">
+          <circle class="halo" r="{{ .halo_r }}"/>
+          <circle class="core" r="{{ .core_r }}"/>
+          {{ if .label }}
+            <text class="label" y="{{ .label_y | default -22 }}">{{ .label }}</text>
+          {{ end }}
+        </g>
+      {{ end }}
+    </g>
+
+    <g class="spheres" filter="url(#glow)">
+      {{ range .Site.Data.mesh.paths }}
+        <circle class="sphere" r="{{ .r }}" fill="{{ .fill }}">
+          <animateMotion dur="{{ .dur }}"
+                         {{ with .begin }}begin="{{ . }}"{{ end }}
+                         repeatCount="indefinite"
+                         path="{{ .d }}"/>
+        </circle>
+      {{ end }}
+    </g>
+  </svg>
+  <p class="mesh-caption">{{ .Site.Params.meshCaption | safeHTML }}</p>
+</div>

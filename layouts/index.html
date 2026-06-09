@@ -1,0 +1,89 @@
+{{ define "main" }}
+<section class="hero">
+  <h1>
+    <span class="accent">{{ .Site.Params.heroAccent }}</span>
+    {{- with .Site.Params.statusBadge }}<span class="status">{{ . }}</span>{{ end -}}
+  </h1>
+  {{ with .Site.Params.heroTagline }}<p class="tag">{{ . }}</p>{{ end }}
+  <div class="intro">
+    {{ range .Site.Params.heroIntro }}<p>{{ . | safeHTML }}</p>{{ end }}
+  </div>
+
+  {{ partial "mesh.html" . }}
+</section>
+
+<section id="why">
+  <h2>Why go-virtio</h2>
+  <p>
+    Every Go project that talks to a virtio device today re-implements the same plumbing :
+    walk the PCI capability chain, pin the modern-config registers, build a split-virtqueue,
+    drive the per-device-class state machine. The code is largely identical from project to
+    project, but it's pasted into each codebase and tested only against the one transport
+    that project happens to use. <strong>go-virtio</strong> factors the shared pieces out
+    into <code>common</code>, expresses the host-side dependency as a small
+    <code>Transport</code> interface, and ships per-device-class drivers (<code>net</code>,
+    <code>blk</code>, &hellip;) on top &mdash; reusable, well-tested, and portable across
+    backplanes.
+  </p>
+</section>
+
+<section id="stack">
+  <h2>The stack</h2>
+  <div class="grid">
+    <div class="card">
+      <h4>Spec-level drivers</h4>
+      <p>One Go module per virtio device-class. Each owns the per-frame layout, feature-acceptance mask, init sequence, and per-queue state machine for that class.</p>
+    </div>
+    <div class="card">
+      <h4><code>go-virtio/common</code></h4>
+      <p>The single waist. PCI cap walker, modern-config layout (Virtio 1.1 &sect;4.1.5), split-virtqueue, and the <code>Transport</code> interface every driver consumes.</p>
+    </div>
+    <div class="card">
+      <h4>Host backplane</h4>
+      <p>Anything that satisfies <code>Transport</code>: UEFI's <code>EFI_PCI_IO_PROTOCOL</code>, bare-metal MMIO, virtio-mmio adapter, in-process test harness. Drivers don't know the difference.</p>
+    </div>
+  </div>
+</section>
+
+<section id="repos">
+  <h2>Repositories</h2>
+  <div class="grid">
+    <div class="card">
+      <h4><a href="https://github.com/go-virtio/common">common</a></h4>
+      <p>Transport-agnostic infrastructure: PCI capability walker, <code>ModernConfig</code> handle, split-virtqueue, transport interfaces. Coverage at ~96%, climbing to 100%.</p>
+    </div>
+    <div class="card">
+      <h4><a href="https://github.com/go-virtio/net">net</a></h4>
+      <p>Pure-Go virtio-net driver. Modern-transport init sequence, split-ring TX/RX path for the standard PCI virtio-net device (VID 0x1AF4, DID 0x1041). 100% coverage target.</p>
+    </div>
+    <div class="card">
+      <h4><a href="https://github.com/go-virtio/blk">blk</a></h4>
+      <p>Pure-Go virtio-blk driver. Placeholder today; activates when a concrete caller (microVM block device during pre-EBS) needs the request-virtqueue path.</p>
+    </div>
+  </div>
+</section>
+
+<section id="quality">
+  <h2>Quality bar</h2>
+  <ul class="features">
+    <li><strong>Pure Go.</strong> <code>CGO_ENABLED=0</code> across the org. No host driver shim, no kernel dependency.</li>
+    <li><strong>100% test coverage.</strong> Every module is gated on it. Error branches, not just happy paths.</li>
+    <li><strong>Spec-traceable.</strong> Every register, descriptor field, and feature bit cites the Virtio 1.1 section it implements.</li>
+    <li><strong>Transport-pluggable.</strong> The same driver code drives a real device under UEFI, a virtio-mmio adapter on bare metal, and an in-process harness in tests.</li>
+    <li><strong>Multi-arch.</strong> No architecture-specific assembly. Same source on amd64, arm64, riscv64, loongarch64.</li>
+    <li><strong>BSD-3-Clause</strong> on every source file.</li>
+  </ul>
+</section>
+
+<section id="users">
+  <h2>Who uses it</h2>
+  <p>
+    The first consumer is <a href="https://github.com/cloud-boot"><strong>cloud-boot</strong></a> &mdash;
+    specifically the pure-UEFI TamaGo loader that drives the guest's virtio-net NIC during PXE / HTTP
+    boot under Apple <code>Virtualization.framework</code> and KVM/OVMF. The intent is that any Go
+    project running close to the metal &mdash; microVM runtimes, bootloaders, unikernels, test
+    harnesses &mdash; can pull in <code>go-virtio/*</code> instead of re-implementing the same
+    <code>struct virtio_pci_cap</code> walk.
+  </p>
+</section>
+{{ end }}

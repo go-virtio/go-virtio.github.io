@@ -1,0 +1,214 @@
+# go-virtio stack visualisation — read by layouts/partials/mesh.html.
+#
+# Three rows :
+#   Top    : spec-level drivers (net, blk, future gpu / scsi / console).
+#   Middle : the common waist — single Transport interface.
+#   Bottom : host backplane (UEFI, MMIO, virtio-mmio, test harness).
+#
+# Spheres flow common → driver → host, encoding "one Transport,
+# every backplane".
+
+# ---------- Containers (back layer rectangles) ----------
+
+# Top band : drivers.
+[[containers]]
+kind  = "dc"
+x     = 60
+y     = 60
+w     = 1080
+h     = 130
+label = "SPEC-LEVEL DRIVERS"
+lx    = 130
+ly    = 50
+
+# Middle band : common.
+[[containers]]
+kind  = "rack"
+x     = 360
+y     = 240
+w     = 480
+h     = 110
+label = "go-virtio/common — Transport interface"
+lx    = 430
+ly    = 232
+
+# Bottom band : host backplane.
+[[containers]]
+kind  = "dc"
+x     = 60
+y     = 400
+w     = 1080
+h     = 120
+label = "HOST BACKPLANE"
+lx    = 130
+ly    = 392
+
+# ---------- Nodes ----------
+
+# Drivers (top row). Labels above.
+[[nodes]]
+x = 220
+y = 130
+kind = "arch"
+label = "net"
+halo_r = 18
+core_r = 10
+label_y = -28
+[[nodes]]
+x = 470
+y = 130
+kind = "arch"
+label = "blk"
+halo_r = 18
+core_r = 10
+label_y = -28
+[[nodes]]
+x = 720
+y = 130
+kind = "distro"
+label = "gpu (future)"
+halo_r = 14
+core_r = 7
+label_y = -26
+[[nodes]]
+x = 970
+y = 130
+kind = "distro"
+label = "scsi (future)"
+halo_r = 14
+core_r = 7
+label_y = -26
+
+# Centre hub : common.
+[[nodes]]
+x = 600
+y = 295
+kind = "hub"
+label = "common"
+halo_r = 26
+core_r = 14
+label_y = 48
+
+# Host backplane (bottom row). Labels below.
+[[nodes]]
+x = 180
+y = 460
+kind = "distro"
+label = "UEFI PCI_IO"
+halo_r = 12
+core_r = 6
+label_y = 26
+[[nodes]]
+x = 420
+y = 460
+kind = "distro"
+label = "MMIO"
+halo_r = 12
+core_r = 6
+label_y = 26
+[[nodes]]
+x = 660
+y = 460
+kind = "distro"
+label = "virtio-mmio"
+halo_r = 12
+core_r = 6
+label_y = 26
+[[nodes]]
+x = 900
+y = 460
+kind = "distro"
+label = "test harness"
+halo_r = 12
+core_r = 6
+label_y = 26
+
+# ---------- Edges ----------
+
+# Drivers ↔ common (highlighted — the import edge).
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 220
+y2 = 130
+highlight = true
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 470
+y2 = 130
+highlight = true
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 720
+y2 = 130
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 970
+y2 = 130
+
+# Common ↔ host backplane.
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 180
+y2 = 460
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 420
+y2 = 460
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 660
+y2 = 460
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 900
+y2 = 460
+
+# ---------- Paths (moving spheres) ----------
+#
+# Each sphere is one (driver, host) pairing being driven through
+# common. Staggered timing so the eye sees continuous flow in both
+# directions through the waist.
+
+[[paths]]
+d = "M 220 130 L 600 295 L 180 460"
+dur = "5s"
+r = 5
+fill = "var(--accent-3)"
+[[paths]]
+d = "M 220 130 L 600 295 L 420 460"
+dur = "5.5s"
+begin = "0.6s"
+r = 5
+fill = "var(--accent-2)"
+[[paths]]
+d = "M 470 130 L 600 295 L 660 460"
+dur = "5s"
+begin = "1.2s"
+r = 5
+fill = "var(--accent)"
+[[paths]]
+d = "M 470 130 L 600 295 L 900 460"
+dur = "6s"
+begin = "1.8s"
+r = 5
+fill = "var(--accent-3)"
+[[paths]]
+d = "M 720 130 L 600 295 L 180 460"
+dur = "5.5s"
+begin = "2.4s"
+r = 5
+fill = "var(--accent-2)"
+[[paths]]
+d = "M 970 130 L 600 295 L 900 460"
+dur = "6s"
+begin = "3s"
+r = 5
+fill = "var(--accent)"
