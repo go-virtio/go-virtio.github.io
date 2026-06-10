@@ -82,16 +82,16 @@
       <p>virtio-gpu (DID 0x1050). 2D framebuffer + <strong>virgl 3D</strong> (host-GPU clear / triangle / textured) + a pure-Go software 3D rasterizer (<code>gpu/soft3d</code>).</p>
     </div>
     <div class="card">
-      <h4><a href="https://github.com/go-virtio/fs">fs</a> · v0.2.0</h4>
-      <p>virtio-fs (DID 0x105A). FUSE-over-virtio <strong>read-write</strong> mount: <code>Init</code> / <code>Lookup</code> / <code>Open</code> / <code>Read</code> + <code>Write</code> / <code>Create</code> / <code>Mkdir</code> / <code>SetAttr</code> / <code>Unlink</code> / <code>Rename</code> / <code>Fsync</code> &hellip; (each <code>fuse.h</code>-cited).</p>
+      <h4><a href="https://github.com/go-virtio/fs">fs</a> · v0.2.1</h4>
+      <p>virtio-fs (DID 0x105A). FUSE-over-virtio <strong>read-write</strong> mount: <code>Init</code> / <code>Lookup</code> / <code>Open</code> / <code>Read</code> + <code>Write</code> / <code>Create</code> / <code>Mkdir</code> / <code>SetAttr</code> / <code>Unlink</code> / <code>Rename</code> / <code>Fsync</code> &hellip; (each <code>fuse.h</code>-cited). v0.2.1 fixes a <code>fuse_attr</code> struct-size bug found by real-virtiofsd validation.</p>
     </div>
     <div class="card">
       <h4><a href="https://github.com/go-virtio/venus">venus</a> · v0.5.1</h4>
-      <p>Vulkan-over-virtio, end-to-end: a <code>vk.xml</code>&rarr;Go serializer generator (offline byte-verified) plus a working shared-memory ring transport. A clear-image runs end-to-end on a real renderer &mdash; the guest submits the full Vulkan sequence (instance&rarr;device&rarr;image&rarr;clear&rarr;submit) over the ring to <code>virgl_test_server --venus</code> + lavapipe and the host executes the clear (host-confirmed). Guest-side pixel readback still needs a host with a DRM render node.</p>
+      <p>Vulkan-over-virtio, full: a <code>vk.xml</code>&rarr;Go serializer generator (offline byte-verified) plus a working shared-memory ring transport. A clear-image runs end-to-end on a real renderer &mdash; the guest submits the full Vulkan sequence (instance&rarr;device&rarr;image&rarr;clear&rarr;submit) over the ring to <code>virgl_test_server --venus</code> + lavapipe and the host executes the clear, <strong>and on a Linux render-node host the guest maps the cleared image's <code>HOST3D|MAPPABLE</code> blob (gbm dma_buf) and reads the texels back as RED</strong> &mdash; guest-side pixel readback included.</p>
     </div>
     <div class="card">
       <h4><a href="https://github.com/go-virtio/validate">validate</a></h4>
-      <p>Multi-driver real-hardware validation harness (tamago+QEMU) + a pure-Go virglrenderer/Venus vtest client. Hardware-validates 6 of the 8 drivers (gpu, blk, console, net, rng, balloon) on real QEMU virtio-pci devices with byte-level round-trips; the virgl 3D paths and the Venus clear-image are validated against a real <code>virglrenderer</code>/lavapipe.</p>
+      <p>Multi-driver real-hardware validation harness (tamago+QEMU) + a pure-Go virglrenderer/Venus vtest client. Validates all 8 drivers on real devices &mdash; gpu, blk, console, net, rng, balloon on the macOS QEMU host with byte-level round-trips, and vsock + fs on real Linux hosts (vhost-vsock packet round-trip, read+write against a real <code>virtiofsd</code>); the virgl 3D paths and the full Venus clear-image-with-readback are validated against a real <code>virglrenderer</code>/lavapipe.</p>
     </div>
   </div>
 </section>
