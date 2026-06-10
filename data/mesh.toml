@@ -1,9 +1,9 @@
 # go-virtio stack visualisation — read by layouts/partials/mesh.html.
 #
 # Three rows :
-#   Top    : spec-level drivers (net, blk, future gpu / scsi / console).
+#   Top    : the seven spec-level device-class drivers.
 #   Middle : the common waist — single Transport interface.
-#   Bottom : host backplane (UEFI, MMIO, virtio-mmio, test harness).
+#   Bottom : host backplane (UEFI, MMIO, virtio-mmio, TamaGo test harness).
 #
 # Spheres flow common → driver → host, encoding "one Transport,
 # every backplane".
@@ -45,39 +45,64 @@ ly    = 392
 
 # ---------- Nodes ----------
 
-# Drivers (top row). Labels above.
+# Drivers (top row), all shipped. Labels above. gpu is emphasised — it
+# carries the 2D framebuffer, virgl 3D, and the soft3d rasterizer.
 [[nodes]]
-x = 220
+x = 180
 y = 130
 kind = "arch"
 label = "net"
-halo_r = 18
-core_r = 10
-label_y = -28
+halo_r = 15
+core_r = 8
+label_y = -26
 [[nodes]]
-x = 470
+x = 320
+y = 130
+kind = "arch"
+label = "rng"
+halo_r = 15
+core_r = 8
+label_y = -26
+[[nodes]]
+x = 460
+y = 130
+kind = "arch"
+label = "vsock"
+halo_r = 15
+core_r = 8
+label_y = -26
+[[nodes]]
+x = 600
 y = 130
 kind = "arch"
 label = "blk"
-halo_r = 18
-core_r = 10
-label_y = -28
-[[nodes]]
-x = 720
-y = 130
-kind = "distro"
-label = "gpu (future)"
-halo_r = 14
-core_r = 7
+halo_r = 15
+core_r = 8
 label_y = -26
 [[nodes]]
-x = 970
+x = 740
 y = 130
-kind = "distro"
-label = "scsi (future)"
-halo_r = 14
-core_r = 7
+kind = "arch"
+label = "console"
+halo_r = 15
+core_r = 8
 label_y = -26
+[[nodes]]
+x = 880
+y = 130
+kind = "arch"
+label = "balloon"
+halo_r = 15
+core_r = 8
+label_y = -26
+[[nodes]]
+x = 1020
+y = 130
+kind = "arch"
+label = "gpu · 2D+3D"
+halo_r = 20
+core_r = 11
+label_y = -30
 
 # Centre hub : common.
 [[nodes]]
@@ -118,36 +143,56 @@ label_y = 26
 x = 900
 y = 460
 kind = "distro"
-label = "test harness"
+label = "TamaGo / QEMU"
 halo_r = 12
 core_r = 6
 label_y = 26
 
 # ---------- Edges ----------
 
-# Drivers ↔ common (highlighted — the import edge).
+# Drivers ↔ common (the import edge — every driver consumes common).
 [[edges]]
 x1 = 600
 y1 = 295
-x2 = 220
+x2 = 180
 y2 = 130
 highlight = true
 [[edges]]
 x1 = 600
 y1 = 295
-x2 = 470
+x2 = 320
 y2 = 130
 highlight = true
 [[edges]]
 x1 = 600
 y1 = 295
-x2 = 720
+x2 = 460
 y2 = 130
+highlight = true
 [[edges]]
 x1 = 600
 y1 = 295
-x2 = 970
+x2 = 600
 y2 = 130
+highlight = true
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 740
+y2 = 130
+highlight = true
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 880
+y2 = 130
+highlight = true
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 1020
+y2 = 130
+highlight = true
 
 # Common ↔ host backplane.
 [[edges]]
@@ -173,41 +218,40 @@ y2 = 460
 
 # ---------- Paths (moving spheres) ----------
 #
-# Each sphere is one (driver, host) pairing being driven through
-# common. Staggered timing so the eye sees continuous flow in both
-# directions through the waist.
+# Each sphere is one (driver, host) pairing being driven through common.
+# Staggered timing so the eye sees continuous flow through the waist.
 
 [[paths]]
-d = "M 220 130 L 600 295 L 180 460"
+d = "M 180 130 L 600 295 L 180 460"
 dur = "5s"
 r = 5
 fill = "var(--accent-3)"
 [[paths]]
-d = "M 220 130 L 600 295 L 420 460"
+d = "M 460 130 L 600 295 L 420 460"
 dur = "5.5s"
 begin = "0.6s"
 r = 5
 fill = "var(--accent-2)"
 [[paths]]
-d = "M 470 130 L 600 295 L 660 460"
+d = "M 600 130 L 600 295 L 660 460"
 dur = "5s"
 begin = "1.2s"
 r = 5
 fill = "var(--accent)"
 [[paths]]
-d = "M 470 130 L 600 295 L 900 460"
+d = "M 1020 130 L 600 295 L 900 460"
 dur = "6s"
 begin = "1.8s"
 r = 5
 fill = "var(--accent-3)"
 [[paths]]
-d = "M 720 130 L 600 295 L 180 460"
+d = "M 740 130 L 600 295 L 180 460"
 dur = "5.5s"
 begin = "2.4s"
 r = 5
 fill = "var(--accent-2)"
 [[paths]]
-d = "M 970 130 L 600 295 L 900 460"
+d = "M 880 130 L 600 295 L 900 460"
 dur = "6s"
 begin = "3s"
 r = 5
