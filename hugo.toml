@@ -17,7 +17,7 @@ disableKinds = ['taxonomy', 'term', 'rss', 'sitemap']
     "Extracted from the <a href=\"https://github.com/cloud-boot\">cloud-boot</a> TamaGo + UEFI loader, but designed from day one to run anywhere virtio runs. The point is to replace fragmented in-tree virtio code across Go projects with one reusable, well-tested, transport-pluggable set of drivers."
   ]
 
-  meshCaption = "<strong>One Transport interface, seven drivers.</strong> <code>go-virtio/common</code> sits between the spec-level drivers (net, rng, vsock, blk, console, balloon, gpu) and the host backplane (UEFI, bare-metal MMIO, virtio-mmio, TamaGo). Swap the backplane, keep the driver."
+  meshCaption = "<strong>One Transport interface, eight drivers.</strong> <code>go-virtio/common</code> sits between the spec-level drivers (net, rng, vsock, blk, console, balloon, gpu, fs) and the host backplane (UEFI, bare-metal MMIO, virtio-mmio, TamaGo). Swap the backplane, keep the driver."
 
 [menu]
   [[menu.main]]

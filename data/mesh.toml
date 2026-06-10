@@ -1,7 +1,7 @@
 # go-virtio stack visualisation — read by layouts/partials/mesh.html.
 #
 # Three rows :
-#   Top    : the seven spec-level device-class drivers.
+#   Top    : the eight spec-level device-class drivers.
 #   Middle : the common waist — single Transport interface.
 #   Bottom : host backplane (UEFI, MMIO, virtio-mmio, TamaGo test harness).
 #
@@ -56,7 +56,7 @@ halo_r = 15
 core_r = 8
 label_y = -26
 [[nodes]]
-x = 320
+x = 300
 y = 130
 kind = "arch"
 label = "rng"
@@ -64,7 +64,7 @@ halo_r = 15
 core_r = 8
 label_y = -26
 [[nodes]]
-x = 460
+x = 420
 y = 130
 kind = "arch"
 label = "vsock"
@@ -72,7 +72,7 @@ halo_r = 15
 core_r = 8
 label_y = -26
 [[nodes]]
-x = 600
+x = 540
 y = 130
 kind = "arch"
 label = "blk"
@@ -80,7 +80,7 @@ halo_r = 15
 core_r = 8
 label_y = -26
 [[nodes]]
-x = 740
+x = 660
 y = 130
 kind = "arch"
 label = "console"
@@ -88,7 +88,7 @@ halo_r = 15
 core_r = 8
 label_y = -26
 [[nodes]]
-x = 880
+x = 780
 y = 130
 kind = "arch"
 label = "balloon"
@@ -96,13 +96,21 @@ halo_r = 15
 core_r = 8
 label_y = -26
 [[nodes]]
-x = 1020
+x = 900
 y = 130
 kind = "arch"
 label = "gpu · 2D+3D"
 halo_r = 20
 core_r = 11
 label_y = -30
+[[nodes]]
+x = 1020
+y = 130
+kind = "arch"
+label = "fs"
+halo_r = 15
+core_r = 8
+label_y = -26
 
 # Centre hub : common.
 [[nodes]]
@@ -160,31 +168,37 @@ highlight = true
 [[edges]]
 x1 = 600
 y1 = 295
-x2 = 320
+x2 = 300
 y2 = 130
 highlight = true
 [[edges]]
 x1 = 600
 y1 = 295
-x2 = 460
+x2 = 420
 y2 = 130
 highlight = true
 [[edges]]
 x1 = 600
 y1 = 295
-x2 = 600
+x2 = 540
 y2 = 130
 highlight = true
 [[edges]]
 x1 = 600
 y1 = 295
-x2 = 740
+x2 = 660
 y2 = 130
 highlight = true
 [[edges]]
 x1 = 600
 y1 = 295
-x2 = 880
+x2 = 780
+y2 = 130
+highlight = true
+[[edges]]
+x1 = 600
+y1 = 295
+x2 = 900
 y2 = 130
 highlight = true
 [[edges]]
@@ -227,13 +241,13 @@ dur = "5s"
 r = 5
 fill = "var(--accent-3)"
 [[paths]]
-d = "M 460 130 L 600 295 L 420 460"
+d = "M 420 130 L 600 295 L 420 460"
 dur = "5.5s"
 begin = "0.6s"
 r = 5
 fill = "var(--accent-2)"
 [[paths]]
-d = "M 600 130 L 600 295 L 660 460"
+d = "M 540 130 L 600 295 L 660 460"
 dur = "5s"
 begin = "1.2s"
 r = 5
@@ -245,13 +259,13 @@ begin = "1.8s"
 r = 5
 fill = "var(--accent-3)"
 [[paths]]
-d = "M 740 130 L 600 295 L 180 460"
+d = "M 660 130 L 600 295 L 180 460"
 dur = "5.5s"
 begin = "2.4s"
 r = 5
 fill = "var(--accent-2)"
 [[paths]]
-d = "M 880 130 L 600 295 L 900 460"
+d = "M 900 130 L 600 295 L 900 460"
 dur = "6s"
 begin = "3s"
 r = 5

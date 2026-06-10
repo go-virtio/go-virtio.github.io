@@ -21,9 +21,9 @@
     project, but it's pasted into each codebase and tested only against the one transport
     that project happens to use. <strong>go-virtio</strong> factors the shared pieces out
     into <code>common</code>, expresses the host-side dependency as a small
-    <code>Transport</code> interface, and ships seven per-device-class drivers
+    <code>Transport</code> interface, and ships eight per-device-class drivers
     (<code>net</code>, <code>rng</code>, <code>vsock</code>, <code>blk</code>,
-    <code>console</code>, <code>balloon</code>, <code>gpu</code>) on top &mdash;
+    <code>console</code>, <code>balloon</code>, <code>gpu</code>, <code>fs</code>) on top &mdash;
     reusable, well-tested, and portable across backplanes.
   </p>
 </section>
@@ -50,8 +50,8 @@
   <h2>Repositories</h2>
   <div class="grid">
     <div class="card">
-      <h4><a href="https://github.com/go-virtio/common">common</a> · v0.1.4</h4>
-      <p>Transport-agnostic infrastructure: PCI capability walker, <code>ModernConfig</code> registers, split-virtqueue + descriptor chaining, device-class IDs, the <code>Transport</code> interface.</p>
+      <h4><a href="https://github.com/go-virtio/common">common</a> · v0.1.5</h4>
+      <p>Transport-agnostic infrastructure: PCI capability walker, <code>ModernConfig</code> registers, split-virtqueue + descriptor chaining, device-class IDs (now also centralizing the virtio-fs IDs), the <code>Transport</code> interface.</p>
     </div>
     <div class="card">
       <h4><a href="https://github.com/go-virtio/net">net</a> · v0.1.1</h4>
@@ -78,16 +78,20 @@
       <p>virtio-balloon (DID 0x1045). <code>Inflate</code> / <code>Deflate</code> via le32 page-frame-number arrays.</p>
     </div>
     <div class="card">
-      <h4><a href="https://github.com/go-virtio/gpu">gpu</a> · v0.5.0</h4>
+      <h4><a href="https://github.com/go-virtio/gpu">gpu</a> · v0.6.0</h4>
       <p>virtio-gpu (DID 0x1050). 2D framebuffer + <strong>virgl 3D</strong> (host-GPU clear / triangle / textured) + a pure-Go software 3D rasterizer (<code>gpu/soft3d</code>).</p>
     </div>
     <div class="card">
-      <h4><a href="https://github.com/go-virtio/venus">venus</a> · v0.2.0</h4>
-      <p>Vulkan-over-virtio groundwork: a <code>vk.xml</code>&rarr;Go serializer generator, validated offline against Mesa's wire encoding. The ring transport is future work.</p>
+      <h4><a href="https://github.com/go-virtio/fs">fs</a> · v0.2.0</h4>
+      <p>virtio-fs (DID 0x105A). FUSE-over-virtio <strong>read-write</strong> mount: <code>Init</code> / <code>Lookup</code> / <code>Open</code> / <code>Read</code> + <code>Write</code> / <code>Create</code> / <code>Mkdir</code> / <code>SetAttr</code> / <code>Unlink</code> / <code>Rename</code> / <code>Fsync</code> &hellip; (each <code>fuse.h</code>-cited).</p>
     </div>
     <div class="card">
-      <h4><a href="https://github.com/go-virtio/validate">validate</a> · v0.1.0</h4>
-      <p>Real-hardware validation harness: boots a TamaGo guest under QEMU, drives a real <code>virtio-gpu</code>, and asserts the rendered frame.</p>
+      <h4><a href="https://github.com/go-virtio/venus">venus</a> · v0.5.1</h4>
+      <p>Vulkan-over-virtio, end-to-end: a <code>vk.xml</code>&rarr;Go serializer generator (offline byte-verified) plus a working shared-memory ring transport. A clear-image runs end-to-end on a real renderer &mdash; the guest submits the full Vulkan sequence (instance&rarr;device&rarr;image&rarr;clear&rarr;submit) over the ring to <code>virgl_test_server --venus</code> + lavapipe and the host executes the clear (host-confirmed). Guest-side pixel readback still needs a host with a DRM render node.</p>
+    </div>
+    <div class="card">
+      <h4><a href="https://github.com/go-virtio/validate">validate</a></h4>
+      <p>Multi-driver real-hardware validation harness (tamago+QEMU) + a pure-Go virglrenderer/Venus vtest client. Hardware-validates 6 of the 8 drivers (gpu, blk, console, net, rng, balloon) on real QEMU virtio-pci devices with byte-level round-trips; the virgl 3D paths and the Venus clear-image are validated against a real <code>virglrenderer</code>/lavapipe.</p>
     </div>
   </div>
 </section>
