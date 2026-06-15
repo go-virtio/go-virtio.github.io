@@ -5,58 +5,100 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 [markup.goldmark.renderer]
   unsafe = true
 
+# Each repo card.
+# "kind"  = which slice of the stack: infra / driver / 3d / harness.
+# "type"  = lib (importable module) vs tool (the validation harness).
+# "ci"    = true only where a GitHub Actions ci.yml actually exists, so the
+#           CI badge never renders an empty "no status" — honest badges only.
+# "blurb" = drawn straight from each repo's README / description.
 [[params.repos]]
   name = "common"
+  kind = "infra"
   type = "lib"
   version = "v0.1.5"
-  blurb = "Transport-agnostic infrastructure: PCI capability walker, `ModernConfig` registers, split-virtqueue with descriptor chaining, device-class IDs (now centralizing the virtio-fs IDs too), and the `Transport` interface every driver consumes."
+  ci = false
+  blurb = "Transport-agnostic infrastructure: PCI capability walker, `ModernConfig` registers, split-virtqueue with descriptor chaining, device-class IDs, and the `Transport` interface every driver consumes."
 [[params.repos]]
   name = "net"
+  kind = "driver"
   type = "lib"
   version = "v0.1.1"
+  ci = false
   blurb = "virtio-net (DID 0x1041). Frame-level `TransmitFrame` / `ReceiveFrame` over a TX/RX queue pair."
 [[params.repos]]
   name = "rng"
+  kind = "driver"
   type = "lib"
   version = "v0.1.1"
+  ci = false
   blurb = "virtio-rng (DID 0x1044). Single-queue entropy `Read` — the minimal device class."
 [[params.repos]]
   name = "vsock"
+  kind = "driver"
   type = "lib"
   version = "v0.1.1"
+  ci = false
   blurb = "virtio-vsock (DID 0x1053). Three queues; packet-level `SendPacket` / `ReceivePacket` with `virtio_vsock_hdr`."
 [[params.repos]]
   name = "blk"
+  kind = "driver"
   type = "lib"
   version = "v0.2.0"
+  ci = false
   blurb = "virtio-blk (DID 0x1042). `ReadBlocks` / `WriteBlocks` / `Flush`; requests are header + data + status descriptor chains."
 [[params.repos]]
   name = "console"
+  kind = "driver"
   type = "lib"
   version = "v0.1.0"
+  ci = false
   blurb = "virtio-console (DID 0x1043). Raw byte-stream `Write` / `Read` over an rx/tx pair."
 [[params.repos]]
   name = "balloon"
+  kind = "driver"
   type = "lib"
   version = "v0.1.0"
+  ci = false
   blurb = "virtio-balloon (DID 0x1045). `Inflate` / `Deflate` via le32 page-frame-number arrays."
 [[params.repos]]
-  name = "gpu"
+  name = "input"
+  kind = "driver"
   type = "lib"
-  version = "v0.6.0"
-  blurb = "virtio-gpu (DID 0x1050). 2D framebuffer + **virgl 3D** (host-GPU clear / triangle / textured triangle) + a pure-Go **software 3D rasterizer** (`gpu/soft3d`)."
+  version = "main"
+  ci = true
+  blurb = "virtio-input (DID 0x1052). Device-to-guest event read path (`ReadEvent`) mirroring Linux's `input_event`; keyboard + relative-pointer baseline, buffers re-posted on the eventq."
+[[params.repos]]
+  name = "sound"
+  kind = "driver"
+  type = "lib"
+  version = "main"
+  ci = true
+  blurb = "virtio-sound (DID 0x1059). Modern-transport init plus the minimum PCM playback + capture data paths; routes raw `S16_LE` frames over the tx/rx queues (single-jack Virtio 1.2 baseline)."
+[[params.repos]]
+  name = "gpu"
+  kind = "3d"
+  type = "lib"
+  version = "v0.6.1"
+  ci = false
+  blurb = "virtio-gpu (DID 0x1050). 2D framebuffer + **virgl 3D** (host-GPU clear / triangle / textured triangle) + a dependency-free pure-Go **software 3D rasterizer** (`gpu/soft3d`)."
 [[params.repos]]
   name = "fs"
+  kind = "driver"
   type = "lib"
   version = "v0.2.1"
-  blurb = "virtio-fs (DID 0x105A). FUSE-over-virtio **read-write** mount: Init / Lookup / Open / Read + Write / Create / Mkdir / SetAttr / Unlink / Rename / Fsync … (each `fuse.h`-cited). v0.2.1 fixes a `fuse_attr` struct-size bug found by real-virtiofsd validation."
+  ci = false
+  blurb = "virtio-fs (DID 0x105A). FUSE-over-virtio **read-write** mount: Init / Lookup / Open / Read + Write / Create / Mkdir / SetAttr / Unlink / Rename / Fsync … (each `fuse.h`-cited)."
 [[params.repos]]
   name = "venus"
+  kind = "3d"
   type = "lib"
   version = "v0.5.1"
-  blurb = "**Vulkan-over-virtio** (Venus), full: a `vk.xml`→Go serializer/generator (offline byte-verified) plus a shared-memory ring transport. A clear-image runs end-to-end on a real renderer — the guest submits the full Vulkan sequence (instance→device→image→clear→submit) over the ring to `virgl_test_server --venus` + lavapipe, **and on a Linux render-node host maps the cleared image's `HOST3D|MAPPABLE` blob and reads the texels back as RED** — guest-side pixel readback included."
+  ci = false
+  blurb = "**Vulkan-over-virtio** (Venus). A `vk.xml`→Go serializer/generator plus a shared-memory ring transport; a clear-image runs end-to-end on a real renderer (`virgl_test_server --venus` + lavapipe), and on a Linux render-node host the guest maps the cleared `HOST3D|MAPPABLE` blob and reads the texels back — guest-side pixel readback included."
 [[params.repos]]
   name = "validate"
+  kind = "harness"
   type = "tool"
   version = "v0.1.0"
-  blurb = "Multi-driver real-hardware validation harness (tamago + QEMU) plus a pure-Go virglrenderer/Venus vtest client. Validates all 8 drivers on real devices — gpu, blk, console, net, rng, balloon on the macOS QEMU host with byte-level round-trips, vsock + fs on real Linux hosts — and the virgl 3D paths + full Venus clear-image-with-readback against a real `virglrenderer`/lavapipe."
+  ci = false
+  blurb = "Multi-driver real-hardware validation harness (tamago + QEMU) plus a pure-Go virglrenderer/Venus vtest client. Exercises every driver on real devices and the virgl 3D paths + full Venus clear-image-with-readback against a real `virglrenderer` / lavapipe."

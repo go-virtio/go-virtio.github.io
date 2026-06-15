@@ -3,30 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>{{ .Site.Title }} — pure-Go, transport-agnostic virtio drivers (zero cgo, every Go target)</title>
-<meta name="description" content="go-virtio — pure-Go, transport-agnostic virtio device-class drivers. Eight drivers behind one Transport interface, 2D + virgl 3D + Venus, validated on real devices, zero cgo.">
+<title>{{ .Site.Title }} — pure-Go, transport-agnostic virtio guest drivers</title>
+<meta name="description" content="Pure-Go guest virtio device-class drivers: net, rng, vsock, blk, console, balloon, input, sound, gpu (2D + virgl 3D + software rasterizer) and fs, plus Venus (Vulkan-over-virtio). One Transport interface, zero cgo, 100% coverage, validated on real devices and renderers.">
 <style>
   :root {
     --bg: #ffffff; --fg: #1b1f24; --muted: #57606a; --card: #f6f8fa;
-    --border: #d0d7de; --accent: #4f46e5; --accent-fg: #ffffff;
-    --ready: #1a7f37; --planned: #9a6700;
-    --lib: #4f46e5; --tool: #9a6700;
+    --border: #d0d7de; --accent: #0079a8; --accent-fg: #ffffff;
+    --driver: #0079a8; --infra: #6f42c1; --3d: #9a6700; --harness: #1a7f37;
   }
   /* System mode (no explicit choice) follows the OS preference. */
   @media (prefers-color-scheme: dark) {
     :root:not([data-theme]) {
       --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --card: #161b22;
-      --border: #30363d; --accent: #818cf8; --accent-fg: #0d1117;
-      --ready: #3fb950; --planned: #d29922;
-      --lib: #818cf8; --tool: #d29922;
+      --border: #30363d; --accent: #22cce2; --accent-fg: #0d1117;
+      --driver: #22cce2; --infra: #a371f7; --3d: #d29922; --harness: #3fb950;
     }
   }
   /* Forced dark (manual toggle). */
   :root[data-theme="dark"] {
     --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --card: #161b22;
-    --border: #30363d; --accent: #818cf8; --accent-fg: #0d1117;
-    --ready: #3fb950; --planned: #d29922;
-    --lib: #818cf8; --tool: #d29922;
+    --border: #30363d; --accent: #22cce2; --accent-fg: #0d1117;
+    --driver: #22cce2; --infra: #a371f7; --3d: #d29922; --harness: #3fb950;
   }
   .theme-toggle {
     position: fixed; top: 14px; right: 14px; z-index: 10;
@@ -38,45 +35,45 @@
     margin: 0; background: var(--bg); color: var(--fg);
     font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
   }
-  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px; }
+  .wrap { max-width: 980px; margin: 0 auto; padding: 0 20px; }
   header { padding: 72px 0 32px; text-align: center; }
-  .logo { display: block; margin: 0 auto 18px; border-radius: 22px; }
+  .logo { width: 88px; height: 88px; margin: 0 auto 18px; display: block; }
   h1 { font-size: 2.6rem; margin: 0 0 .3em; letter-spacing: -.02em; }
-  .tagline { font-size: 1.2rem; color: var(--muted); margin: 0 auto; max-width: 660px; }
+  .tagline { font-size: 1.2rem; color: var(--muted); margin: 0 auto; max-width: 680px; }
   .pills { margin: 22px 0 0; }
   .pill {
     display: inline-block; margin: 4px; padding: 3px 10px; font-size: .82rem;
     color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 999px;
   }
   .cta { margin: 30px 0 0; }
-  .badges { margin: 18px 0 0; }
-  .badges a { margin: 0 3px; text-decoration: none; }
-  .badges img { vertical-align: middle; }
   .btn {
     display: inline-block; padding: 10px 18px; margin: 4px; border-radius: 8px; text-decoration: none;
     font-weight: 600; border: 1px solid var(--border);
   }
   .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
   .btn.ghost { color: var(--fg); background: transparent; }
-  .lead { color: var(--fg); max-width: 760px; margin: 8px auto 0; text-align: center; }
+  .lead { color: var(--fg); max-width: 800px; margin: 8px auto 0; text-align: center; }
   .lead code { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
-  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; padding: 24px 0 8px; }
-  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  h2.section { text-align: center; margin: 40px 0 4px; font-size: 1.4rem; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; padding: 16px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; display: flex; flex-direction: column; }
   .card h3 { margin: 0 0 .35em; font-size: 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
   .card h3 a { text-decoration: none; }
-  .card h3 a:hover { text-decoration: underline; }
-  .card p { margin: .4em 0 0; color: var(--fg); }
+  .card .ver { color: var(--muted); font-size: .85rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; margin: 0 0 .6em; }
+  .card p { margin: 0 0 .8em; color: var(--fg); font-size: .95rem; }
   .card p code { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
-  .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-  .ver { font-size: .8rem; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
-  /* lib vs CLI/tool kind badge — the go-virtio repos are libraries except the validation harness. */
-  .badge { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 2px 9px; border-radius: 999px; white-space: nowrap; border: 1px solid currentColor; }
-  .badge-lib { color: var(--lib); }
-  .badge-tool { color: var(--tool); }
-  .status { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
-  .status.ready { color: var(--ready); }
-  .status.planned { color: var(--planned); }
-  .principles { color: var(--muted); text-align: center; padding: 10px 0 0; }
+  .card .badges { margin-top: auto; }
+  .card .badges img { height: 20px; vertical-align: middle; }
+  .kind { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); }
+  .kind.driver { color: var(--driver); }
+  .kind.infra { color: var(--infra); }
+  .kind.id3d { color: var(--3d); }
+  .kind.harness { color: var(--harness); }
+  .card h3 .tags { display: inline-flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+  .type { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
+  .type.lib { color: var(--accent); border-color: var(--accent); }
+  .type.tool { color: var(--accent-fg); background: var(--accent); border-color: var(--accent); }
+  .principles { color: var(--muted); text-align: center; padding: 10px 0 0; max-width: 820px; margin: 0 auto; }
   footer { color: var(--muted); text-align: center; padding: 40px 0 56px; font-size: .9rem; }
   a { color: var(--accent); }
 </style>
@@ -89,58 +86,69 @@
 <body>
   <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light, dark or system theme"><span id="theme-label">🖥️ System</span></button>
   <header class="wrap">
-    <img class="logo" width="120" height="120" alt="go-virtio"
-         src="https://raw.githubusercontent.com/go-virtio/brand/main/png/color/256/go-virtio.png">
+    <img class="logo" src="/img/logo.svg" alt="go-virtio logo" width="88" height="88">
     <h1>go-virtio</h1>
-    <p class="tagline">Pure-Go, transport-agnostic virtio drivers.</p>
+    <p class="tagline">Pure-Go, transport-agnostic <strong>guest virtio drivers</strong> — one
+      <code>common.Transport</code> interface, every device class, and <strong>zero cgo</strong> on
+      a plain <code>go build</code>.</p>
     <div class="pills">
-      <span class="pill">pure Go · zero cgo</span>
+      <span class="pill">CGO_ENABLED=0</span>
       <span class="pill">transport-pluggable</span>
-      <span class="pill">8 device-class drivers</span>
-      <span class="pill">2D + virgl 3D + Venus</span>
-      <span class="pill">multi-arch (every Go target)</span>
+      <span class="pill">net · rng · vsock · blk · console · balloon · input · sound · gpu · fs</span>
+      <span class="pill">2D + virgl 3D + Venus (Vulkan-over-virtio)</span>
+      <span class="pill">validated on real devices &amp; renderers</span>
       <span class="pill">100% coverage</span>
     </div>
     <div class="cta">
-      <a class="btn primary" href="https://github.com/go-virtio">GitHub</a>
-      <a class="btn ghost" href="https://github.com/go-virtio/common">common module</a>
-    </div>
-    <div class="badges">
-      <a href="https://github.com/go-virtio"><img alt="GitHub org: go-virtio" src="https://img.shields.io/badge/github-go--virtio-4f46e5"></a>
-      <a href="https://github.com/go-virtio/common/blob/main/LICENSE"><img alt="License: BSD-3-Clause" src="https://img.shields.io/badge/license-BSD--3--Clause-blue"></a>
-      <a href="https://go.dev/dl/"><img alt="pure Go, zero cgo" src="https://img.shields.io/badge/go-CGO__ENABLED%3D0-00ADD8"></a>
-      <a href="https://github.com/go-virtio/validate"><img alt="9 bugs caught by real-device validation" src="https://img.shields.io/badge/real--device%20validation-9%20bugs%20caught-1a7f37"></a>
+      <a class="btn primary" href="https://github.com/go-virtio/.github/blob/main/profile/README.md">Documentation</a>
+      <a class="btn ghost" href="https://github.com/go-virtio">GitHub</a>
     </div>
   </header>
 
   <main class="wrap">
     <p class="lead">go-virtio implements <a href="https://docs.oasis-open.org/virtio/virtio/v1.1/virtio-v1.1.html">virtio</a>
-      device-class drivers in pure Go — no cgo, no kernel — routing every transport-level operation through one narrow
-      <code>common.Transport</code> interface, so the same driver code runs under UEFI, bare-metal MMIO, virtio-mmio, or any
-      backplane that satisfies the contract. Eight drivers sit on top of a single shared <code>common</code> waist (PCI cap
-      walker, modern-config registers, split-virtqueue with descriptor chaining). Extracted from the
-      <a href="https://github.com/cloud-boot">cloud-boot</a> TamaGo + UEFI loader, designed to run anywhere virtio runs.</p>
+      device-class drivers in pure Go &mdash; no cgo, no kernel &mdash; routing every transport-level
+      operation through one narrow <code>common.Transport</code> interface, so the same driver code
+      runs under UEFI's <code>EFI_PCI_IO_PROTOCOL</code>, bare-metal MMIO, virtio-mmio, or any backplane
+      that satisfies the contract. The drivers sit on a single shared <code>common</code> waist &mdash;
+      a PCI capability walker, modern-config registers, and a split-virtqueue with descriptor chaining.
+      Extracted from the <a href="https://github.com/cloud-boot">cloud-boot</a> TamaGo + UEFI loader,
+      designed from day one to run anywhere virtio runs.</p>
 
+    <p class="lead"><strong>Pure Go, no cgo, real-device validation.</strong> The 3D story is split
+      honestly: <code>gpu/soft3d</code> is a dependency-free CPU rasterizer that works on any host;
+      <code>gpu</code>'s virgl path hand-encodes the command stream so a host GPU draws (still CGO=0);
+      and <code>venus</code> is Vulkan-over-virtio with a <code>vk.xml</code>&rarr;Go generator, a
+      shared-memory ring, and guest-side pixel readback. Every driver plus virgl 3D and the full Venus
+      clear-image-with-readback are validated against real devices and renderers &mdash; and that
+      real-hardware validation has caught <strong>9 encoding bugs that fake-device unit tests missed</strong>.
+      No architecture-specific assembly: the same source builds for every Go target.</p>
+
+    <h2 class="section">Repositories</h2>
     <section class="grid">
       {{ range .Site.Params.repos }}
       <article class="card">
         <h3>
-          <a href="https://github.com/go-virtio/{{ .name }}">{{ .name }}</a>
-          <span class="badge badge-{{ .type }}">{{ if eq .type "tool" }}tool{{ else }}lib{{ end }}</span>
+          <a href="https://github.com/go-virtio/{{ .name }}"><code>{{ .name }}</code></a>
+          <span class="tags"><span class="type {{ .type }}">{{ .type }}</span><span class="kind {{ if eq .kind "3d" }}id3d{{ else }}{{ .kind }}{{ end }}">{{ .kind }}</span></span>
         </h3>
-        <p class="meta"><span class="ver">{{ .version }}</span></p>
+        <p class="ver">{{ .version }}</p>
         <p>{{ .blurb | markdownify }}</p>
+        <div class="badges">
+          {{ if .ci }}<a href="https://github.com/go-virtio/{{ .name }}/actions/workflows/ci.yml"><img src="https://github.com/go-virtio/{{ .name }}/actions/workflows/ci.yml/badge.svg" alt="CI"></a>{{ end }}
+          <img src="https://img.shields.io/badge/coverage-100%25-brightgreen" alt="coverage 100%">
+        </div>
       </article>
       {{ end }}
     </section>
-    <p class="principles">Every driver consumes <code>common.Transport</code> and nothing else — swap the backplane, keep the
-      driver. The 3D story is split honestly: <code>gpu/soft3d</code> is a dependency-free CPU rasterizer that works on any host;
-      <code>gpu</code>'s virgl path hand-encodes the command stream so a host GPU draws (still CGO=0); and <code>venus</code> is
-      Vulkan-over-virtio with a <code>vk.xml</code>→Go generator, a shared-memory ring, and guest-side pixel readback. All eight
-      drivers plus virgl 3D and the full Venus clear-image-with-readback are validated on real devices and renderers — and
-      real-hardware validation has caught <strong>9 encoding bugs that fake-device unit tests missed</strong>. Pure Go with no
-      architecture-specific assembly: the same source builds for every Go target (amd64, arm64, riscv64, loongarch64). First
-      consumer: <a href="https://github.com/cloud-boot">cloud-boot</a>.</p>
+    <p class="principles">Every driver consumes <code>common.Transport</code> and nothing else &mdash;
+      swap the backplane, keep the driver. Pure Go with <code>CGO_ENABLED=0</code> and held at 100%
+      statement coverage; the newer <code>input</code> and <code>sound</code> drivers gate that in CI,
+      and the others are covered locally. Real-device and real-renderer validation (via the
+      <a href="https://github.com/go-virtio/validate">validate</a> harness) is the bar: all the drivers
+      plus virgl 3D and the full Venus clear-image-with-readback run against real hardware and
+      <code>virglrenderer</code> / lavapipe. BSD-3-Clause throughout. First consumer:
+      <a href="https://github.com/cloud-boot">cloud-boot</a>.</p>
   </main>
 
   <footer class="wrap">
