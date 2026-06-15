@@ -1,42 +1,62 @@
-baseURL = 'https://go-virtio.github.io/'
-locale  = 'en-us'
-title   = 'go-virtio'
-# No theme — layouts live in ./layouts
+baseURL = "https://go-virtio.github.io/"
+title = "go-virtio"
+disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
 
-disableKinds = ['taxonomy', 'term', 'rss', 'sitemap']
+[markup.goldmark.renderer]
+  unsafe = true
 
-[params]
-  description = "go-virtio is a pure-Go, transport-agnostic family of virtio device-class drivers. One reusable codebase across UEFI, bare-metal MMIO, virtio-mmio, and anything else that can satisfy the Transport interface."
-  brand       = "go-virtio"
-  github      = "go-virtio"
-  heroAccent  = "go-virtio"
-  heroTagline = "Pure-Go virtio drivers. One Transport interface. Every backplane."
-
-  heroIntro = [
-    "<strong>go-virtio</strong> is a small family of Go modules implementing <a href=\"https://docs.oasis-open.org/virtio/virtio/v1.1/virtio-v1.1.html\">virtio</a> device-class drivers in pure Go &mdash; no cgo, no kernel &mdash; and routing every transport-level operation through a narrow interface. The same driver code works under UEFI, bare-metal MMIO, virtio-mmio, and any backplane that can satisfy the contract.",
-    "Extracted from the <a href=\"https://github.com/cloud-boot\">cloud-boot</a> TamaGo + UEFI loader, but designed from day one to run anywhere virtio runs. The point is to replace fragmented in-tree virtio code across Go projects with one reusable, well-tested, transport-pluggable set of drivers."
-  ]
-
-  meshCaption = "<strong>One Transport interface, eight drivers.</strong> <code>go-virtio/common</code> sits between the spec-level drivers (net, rng, vsock, blk, console, balloon, gpu, fs) and the host backplane (UEFI, bare-metal MMIO, virtio-mmio, TamaGo). Swap the backplane, keep the driver."
-
-[menu]
-  [[menu.main]]
-    identifier = "why"
-    name       = "Why"
-    url        = "#why"
-    weight     = 10
-  [[menu.main]]
-    identifier = "stack"
-    name       = "Stack"
-    url        = "#stack"
-    weight     = 20
-  [[menu.main]]
-    identifier = "repos"
-    name       = "Repos"
-    url        = "#repos"
-    weight     = 30
-  [[menu.main]]
-    identifier = "quality"
-    name       = "Quality"
-    url        = "#quality"
-    weight     = 40
+[[params.repos]]
+  name = "common"
+  type = "lib"
+  version = "v0.1.5"
+  blurb = "Transport-agnostic infrastructure: PCI capability walker, `ModernConfig` registers, split-virtqueue with descriptor chaining, device-class IDs (now centralizing the virtio-fs IDs too), and the `Transport` interface every driver consumes."
+[[params.repos]]
+  name = "net"
+  type = "lib"
+  version = "v0.1.1"
+  blurb = "virtio-net (DID 0x1041). Frame-level `TransmitFrame` / `ReceiveFrame` over a TX/RX queue pair."
+[[params.repos]]
+  name = "rng"
+  type = "lib"
+  version = "v0.1.1"
+  blurb = "virtio-rng (DID 0x1044). Single-queue entropy `Read` — the minimal device class."
+[[params.repos]]
+  name = "vsock"
+  type = "lib"
+  version = "v0.1.1"
+  blurb = "virtio-vsock (DID 0x1053). Three queues; packet-level `SendPacket` / `ReceivePacket` with `virtio_vsock_hdr`."
+[[params.repos]]
+  name = "blk"
+  type = "lib"
+  version = "v0.2.0"
+  blurb = "virtio-blk (DID 0x1042). `ReadBlocks` / `WriteBlocks` / `Flush`; requests are header + data + status descriptor chains."
+[[params.repos]]
+  name = "console"
+  type = "lib"
+  version = "v0.1.0"
+  blurb = "virtio-console (DID 0x1043). Raw byte-stream `Write` / `Read` over an rx/tx pair."
+[[params.repos]]
+  name = "balloon"
+  type = "lib"
+  version = "v0.1.0"
+  blurb = "virtio-balloon (DID 0x1045). `Inflate` / `Deflate` via le32 page-frame-number arrays."
+[[params.repos]]
+  name = "gpu"
+  type = "lib"
+  version = "v0.6.0"
+  blurb = "virtio-gpu (DID 0x1050). 2D framebuffer + **virgl 3D** (host-GPU clear / triangle / textured triangle) + a pure-Go **software 3D rasterizer** (`gpu/soft3d`)."
+[[params.repos]]
+  name = "fs"
+  type = "lib"
+  version = "v0.2.1"
+  blurb = "virtio-fs (DID 0x105A). FUSE-over-virtio **read-write** mount: Init / Lookup / Open / Read + Write / Create / Mkdir / SetAttr / Unlink / Rename / Fsync … (each `fuse.h`-cited). v0.2.1 fixes a `fuse_attr` struct-size bug found by real-virtiofsd validation."
+[[params.repos]]
+  name = "venus"
+  type = "lib"
+  version = "v0.5.1"
+  blurb = "**Vulkan-over-virtio** (Venus), full: a `vk.xml`→Go serializer/generator (offline byte-verified) plus a shared-memory ring transport. A clear-image runs end-to-end on a real renderer — the guest submits the full Vulkan sequence (instance→device→image→clear→submit) over the ring to `virgl_test_server --venus` + lavapipe, **and on a Linux render-node host maps the cleared image's `HOST3D|MAPPABLE` blob and reads the texels back as RED** — guest-side pixel readback included."
+[[params.repos]]
+  name = "validate"
+  type = "tool"
+  version = "v0.1.0"
+  blurb = "Multi-driver real-hardware validation harness (tamago + QEMU) plus a pure-Go virglrenderer/Venus vtest client. Validates all 8 drivers on real devices — gpu, blk, console, net, rng, balloon on the macOS QEMU host with byte-level round-trips, vsock + fs on real Linux hosts — and the virgl 3D paths + full Venus clear-image-with-readback against a real `virglrenderer`/lavapipe."

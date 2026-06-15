@@ -1,122 +1,160 @@
-{{ define "main" }}
-<section class="hero">
-  <h1>
-    <span class="accent">{{ .Site.Params.heroAccent }}</span>
-    {{- with .Site.Params.statusBadge }}<span class="status">{{ . }}</span>{{ end -}}
-  </h1>
-  {{ with .Site.Params.heroTagline }}<p class="tag">{{ . }}</p>{{ end }}
-  <div class="intro">
-    {{ range .Site.Params.heroIntro }}<p>{{ . | safeHTML }}</p>{{ end }}
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ .Site.Title }} — pure-Go, transport-agnostic virtio drivers (zero cgo, every Go target)</title>
+<meta name="description" content="go-virtio — pure-Go, transport-agnostic virtio device-class drivers. Eight drivers behind one Transport interface, 2D + virgl 3D + Venus, validated on real devices, zero cgo.">
+<style>
+  :root {
+    --bg: #ffffff; --fg: #1b1f24; --muted: #57606a; --card: #f6f8fa;
+    --border: #d0d7de; --accent: #4f46e5; --accent-fg: #ffffff;
+    --ready: #1a7f37; --planned: #9a6700;
+    --lib: #4f46e5; --tool: #9a6700;
+  }
+  /* System mode (no explicit choice) follows the OS preference. */
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme]) {
+      --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --card: #161b22;
+      --border: #30363d; --accent: #818cf8; --accent-fg: #0d1117;
+      --ready: #3fb950; --planned: #d29922;
+      --lib: #818cf8; --tool: #d29922;
+    }
+  }
+  /* Forced dark (manual toggle). */
+  :root[data-theme="dark"] {
+    --bg: #0d1117; --fg: #e6edf3; --muted: #9198a1; --card: #161b22;
+    --border: #30363d; --accent: #818cf8; --accent-fg: #0d1117;
+    --ready: #3fb950; --planned: #d29922;
+    --lib: #818cf8; --tool: #d29922;
+  }
+  .theme-toggle {
+    position: fixed; top: 14px; right: 14px; z-index: 10;
+    font: inherit; font-size: .8rem; cursor: pointer; padding: 6px 12px;
+    color: var(--fg); background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+  }
+  .wrap { max-width: 920px; margin: 0 auto; padding: 0 20px; }
+  header { padding: 72px 0 32px; text-align: center; }
+  .logo { display: block; margin: 0 auto 18px; border-radius: 22px; }
+  h1 { font-size: 2.6rem; margin: 0 0 .3em; letter-spacing: -.02em; }
+  .tagline { font-size: 1.2rem; color: var(--muted); margin: 0 auto; max-width: 660px; }
+  .pills { margin: 22px 0 0; }
+  .pill {
+    display: inline-block; margin: 4px; padding: 3px 10px; font-size: .82rem;
+    color: var(--muted); background: var(--card); border: 1px solid var(--border); border-radius: 999px;
+  }
+  .cta { margin: 30px 0 0; }
+  .badges { margin: 18px 0 0; }
+  .badges a { margin: 0 3px; text-decoration: none; }
+  .badges img { vertical-align: middle; }
+  .btn {
+    display: inline-block; padding: 10px 18px; margin: 4px; border-radius: 8px; text-decoration: none;
+    font-weight: 600; border: 1px solid var(--border);
+  }
+  .btn.primary { background: var(--accent); color: var(--accent-fg); border-color: var(--accent); }
+  .btn.ghost { color: var(--fg); background: transparent; }
+  .lead { color: var(--fg); max-width: 760px; margin: 8px auto 0; text-align: center; }
+  .lead code { background: var(--card); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+  .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 16px; padding: 24px 0 8px; }
+  .card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+  .card h3 { margin: 0 0 .35em; font-size: 1.2rem; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+  .card h3 a { text-decoration: none; }
+  .card h3 a:hover { text-decoration: underline; }
+  .card p { margin: .4em 0 0; color: var(--fg); }
+  .card p code { background: var(--bg); border: 1px solid var(--border); border-radius: 6px; padding: 1px 6px; }
+  .meta { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .ver { font-size: .8rem; color: var(--muted); font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+  /* lib vs CLI/tool kind badge — the go-virtio repos are libraries except the validation harness. */
+  .badge { font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .05em; padding: 2px 9px; border-radius: 999px; white-space: nowrap; border: 1px solid currentColor; }
+  .badge-lib { color: var(--lib); }
+  .badge-tool { color: var(--tool); }
+  .status { font-size: .72rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); white-space: nowrap; }
+  .status.ready { color: var(--ready); }
+  .status.planned { color: var(--planned); }
+  .principles { color: var(--muted); text-align: center; padding: 10px 0 0; }
+  footer { color: var(--muted); text-align: center; padding: 40px 0 56px; font-size: .9rem; }
+  a { color: var(--accent); }
+</style>
+<script>
+  // Set the saved theme before paint to avoid a flash; "system" leaves no attribute.
+  (function(){var m=localStorage.getItem('theme');if(m&&m!=='system')document.documentElement.setAttribute('data-theme',m);})();
+</script>
+<link rel="icon" type="image/svg+xml" href="/favicon.svg">
+</head>
+<body>
+  <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle light, dark or system theme"><span id="theme-label">🖥️ System</span></button>
+  <header class="wrap">
+    <img class="logo" width="120" height="120" alt="go-virtio"
+         src="https://raw.githubusercontent.com/go-virtio/brand/main/png/color/256/go-virtio.png">
+    <h1>go-virtio</h1>
+    <p class="tagline">Pure-Go, transport-agnostic virtio drivers.</p>
+    <div class="pills">
+      <span class="pill">pure Go · zero cgo</span>
+      <span class="pill">transport-pluggable</span>
+      <span class="pill">8 device-class drivers</span>
+      <span class="pill">2D + virgl 3D + Venus</span>
+      <span class="pill">multi-arch (every Go target)</span>
+      <span class="pill">100% coverage</span>
+    </div>
+    <div class="cta">
+      <a class="btn primary" href="https://github.com/go-virtio">GitHub</a>
+      <a class="btn ghost" href="https://github.com/go-virtio/common">common module</a>
+    </div>
+    <div class="badges">
+      <a href="https://github.com/go-virtio"><img alt="GitHub org: go-virtio" src="https://img.shields.io/badge/github-go--virtio-4f46e5"></a>
+      <a href="https://github.com/go-virtio/common/blob/main/LICENSE"><img alt="License: BSD-3-Clause" src="https://img.shields.io/badge/license-BSD--3--Clause-blue"></a>
+      <a href="https://go.dev/dl/"><img alt="pure Go, zero cgo" src="https://img.shields.io/badge/go-CGO__ENABLED%3D0-00ADD8"></a>
+      <a href="https://github.com/go-virtio/validate"><img alt="9 bugs caught by real-device validation" src="https://img.shields.io/badge/real--device%20validation-9%20bugs%20caught-1a7f37"></a>
+    </div>
+  </header>
 
-  {{ partial "mesh.html" . }}
-</section>
+  <main class="wrap">
+    <p class="lead">go-virtio implements <a href="https://docs.oasis-open.org/virtio/virtio/v1.1/virtio-v1.1.html">virtio</a>
+      device-class drivers in pure Go — no cgo, no kernel — routing every transport-level operation through one narrow
+      <code>common.Transport</code> interface, so the same driver code runs under UEFI, bare-metal MMIO, virtio-mmio, or any
+      backplane that satisfies the contract. Eight drivers sit on top of a single shared <code>common</code> waist (PCI cap
+      walker, modern-config registers, split-virtqueue with descriptor chaining). Extracted from the
+      <a href="https://github.com/cloud-boot">cloud-boot</a> TamaGo + UEFI loader, designed to run anywhere virtio runs.</p>
 
-<section id="why">
-  <h2>Why go-virtio</h2>
-  <p>
-    Every Go project that talks to a virtio device today re-implements the same plumbing :
-    walk the PCI capability chain, pin the modern-config registers, build a split-virtqueue,
-    drive the per-device-class state machine. The code is largely identical from project to
-    project, but it's pasted into each codebase and tested only against the one transport
-    that project happens to use. <strong>go-virtio</strong> factors the shared pieces out
-    into <code>common</code>, expresses the host-side dependency as a small
-    <code>Transport</code> interface, and ships eight per-device-class drivers
-    (<code>net</code>, <code>rng</code>, <code>vsock</code>, <code>blk</code>,
-    <code>console</code>, <code>balloon</code>, <code>gpu</code>, <code>fs</code>) on top &mdash;
-    reusable, well-tested, and portable across backplanes.
-  </p>
-</section>
+    <section class="grid">
+      {{ range .Site.Params.repos }}
+      <article class="card">
+        <h3>
+          <a href="https://github.com/go-virtio/{{ .name }}">{{ .name }}</a>
+          <span class="badge badge-{{ .type }}">{{ if eq .type "tool" }}tool{{ else }}lib{{ end }}</span>
+        </h3>
+        <p class="meta"><span class="ver">{{ .version }}</span></p>
+        <p>{{ .blurb | markdownify }}</p>
+      </article>
+      {{ end }}
+    </section>
+    <p class="principles">Every driver consumes <code>common.Transport</code> and nothing else — swap the backplane, keep the
+      driver. The 3D story is split honestly: <code>gpu/soft3d</code> is a dependency-free CPU rasterizer that works on any host;
+      <code>gpu</code>'s virgl path hand-encodes the command stream so a host GPU draws (still CGO=0); and <code>venus</code> is
+      Vulkan-over-virtio with a <code>vk.xml</code>→Go generator, a shared-memory ring, and guest-side pixel readback. All eight
+      drivers plus virgl 3D and the full Venus clear-image-with-readback are validated on real devices and renderers — and
+      real-hardware validation has caught <strong>9 encoding bugs that fake-device unit tests missed</strong>. Pure Go with no
+      architecture-specific assembly: the same source builds for every Go target (amd64, arm64, riscv64, loongarch64). First
+      consumer: <a href="https://github.com/cloud-boot">cloud-boot</a>.</p>
+  </main>
 
-<section id="stack">
-  <h2>The stack</h2>
-  <div class="grid">
-    <div class="card">
-      <h4>Spec-level drivers</h4>
-      <p>One Go module per virtio device-class. Each owns the per-frame layout, feature-acceptance mask, init sequence, and per-queue state machine for that class.</p>
-    </div>
-    <div class="card">
-      <h4><code>go-virtio/common</code></h4>
-      <p>The single waist. PCI cap walker, modern-config layout (Virtio 1.1 &sect;4.1.5), split-virtqueue, and the <code>Transport</code> interface every driver consumes.</p>
-    </div>
-    <div class="card">
-      <h4>Host backplane</h4>
-      <p>Anything that satisfies <code>Transport</code>: UEFI's <code>EFI_PCI_IO_PROTOCOL</code>, bare-metal MMIO, virtio-mmio adapter, in-process test harness. Drivers don't know the difference.</p>
-    </div>
-  </div>
-</section>
-
-<section id="repos">
-  <h2>Repositories</h2>
-  <div class="grid">
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/common">common</a> · v0.1.5</h4>
-      <p>Transport-agnostic infrastructure: PCI capability walker, <code>ModernConfig</code> registers, split-virtqueue + descriptor chaining, device-class IDs (now also centralizing the virtio-fs IDs), the <code>Transport</code> interface.</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/net">net</a> · v0.1.1</h4>
-      <p>virtio-net (DID 0x1041). Frame-level <code>TransmitFrame</code> / <code>ReceiveFrame</code> over a TX/RX queue pair.</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/rng">rng</a> · v0.1.1</h4>
-      <p>virtio-rng (DID 0x1044). Single-queue entropy <code>Read</code> &mdash; the minimal device class.</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/vsock">vsock</a> · v0.1.1</h4>
-      <p>virtio-vsock (DID 0x1053). Three queues; packet-level <code>SendPacket</code> / <code>ReceivePacket</code> with <code>virtio_vsock_hdr</code>.</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/blk">blk</a> · v0.2.0</h4>
-      <p>virtio-blk (DID 0x1042). <code>ReadBlocks</code> / <code>WriteBlocks</code> / <code>Flush</code>; requests are header + data + status descriptor chains.</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/console">console</a> · v0.1.0</h4>
-      <p>virtio-console (DID 0x1043). Raw byte-stream <code>Write</code> / <code>Read</code> over an rx/tx pair.</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/balloon">balloon</a> · v0.1.0</h4>
-      <p>virtio-balloon (DID 0x1045). <code>Inflate</code> / <code>Deflate</code> via le32 page-frame-number arrays.</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/gpu">gpu</a> · v0.6.0</h4>
-      <p>virtio-gpu (DID 0x1050). 2D framebuffer + <strong>virgl 3D</strong> (host-GPU clear / triangle / textured) + a pure-Go software 3D rasterizer (<code>gpu/soft3d</code>).</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/fs">fs</a> · v0.2.1</h4>
-      <p>virtio-fs (DID 0x105A). FUSE-over-virtio <strong>read-write</strong> mount: <code>Init</code> / <code>Lookup</code> / <code>Open</code> / <code>Read</code> + <code>Write</code> / <code>Create</code> / <code>Mkdir</code> / <code>SetAttr</code> / <code>Unlink</code> / <code>Rename</code> / <code>Fsync</code> &hellip; (each <code>fuse.h</code>-cited). v0.2.1 fixes a <code>fuse_attr</code> struct-size bug found by real-virtiofsd validation.</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/venus">venus</a> · v0.5.1</h4>
-      <p>Vulkan-over-virtio, full: a <code>vk.xml</code>&rarr;Go serializer generator (offline byte-verified) plus a working shared-memory ring transport. A clear-image runs end-to-end on a real renderer &mdash; the guest submits the full Vulkan sequence (instance&rarr;device&rarr;image&rarr;clear&rarr;submit) over the ring to <code>virgl_test_server --venus</code> + lavapipe and the host executes the clear, <strong>and on a Linux render-node host the guest maps the cleared image's <code>HOST3D|MAPPABLE</code> blob (gbm dma_buf) and reads the texels back as RED</strong> &mdash; guest-side pixel readback included.</p>
-    </div>
-    <div class="card">
-      <h4><a href="https://github.com/go-virtio/validate">validate</a></h4>
-      <p>Multi-driver real-hardware validation harness (tamago+QEMU) + a pure-Go virglrenderer/Venus vtest client. Validates all 8 drivers on real devices &mdash; gpu, blk, console, net, rng, balloon on the macOS QEMU host with byte-level round-trips, and vsock + fs on real Linux hosts (vhost-vsock packet round-trip, read+write against a real <code>virtiofsd</code>); the virgl 3D paths and the full Venus clear-image-with-readback are validated against a real <code>virglrenderer</code>/lavapipe.</p>
-    </div>
-  </div>
-</section>
-
-<section id="quality">
-  <h2>Quality bar</h2>
-  <ul class="features">
-    <li><strong>Pure Go.</strong> <code>CGO_ENABLED=0</code> across the org. No host driver shim, no kernel dependency.</li>
-    <li><strong>100% test coverage</strong> is the bar &mdash; met on every device-class driver (error branches, not just happy paths); <code>common</code> and <code>net</code> carry a few defensively-unreachable branches. Measured, not asserted.</li>
-    <li><strong>Spec-traceable.</strong> Every register, descriptor field, and feature bit cites the Virtio 1.1 section it implements.</li>
-    <li><strong>Transport-pluggable.</strong> The same driver code drives a real device under UEFI, a virtio-mmio adapter on bare metal, and an in-process harness in tests.</li>
-    <li><strong>Multi-arch.</strong> No architecture-specific assembly. Same source on amd64, arm64, riscv64, loongarch64.</li>
-    <li><strong>BSD-3-Clause</strong> on every source file.</li>
-  </ul>
-</section>
-
-<section id="users">
-  <h2>Who uses it</h2>
-  <p>
-    The first consumer is <a href="https://github.com/cloud-boot"><strong>cloud-boot</strong></a> &mdash;
-    specifically the pure-UEFI TamaGo loader that drives the guest's virtio-net NIC during PXE / HTTP
-    boot under Apple <code>Virtualization.framework</code> and KVM/OVMF. The intent is that any Go
-    project running close to the metal &mdash; microVM runtimes, bootloaders, unikernels, test
-    harnesses &mdash; can pull in <code>go-virtio/*</code> instead of re-implementing the same
-    <code>struct virtio_pci_cap</code> walk.
-  </p>
-</section>
-{{ end }}
+  <footer class="wrap">
+    BSD-3-Clause · <a href="https://github.com/go-virtio">github.com/go-virtio</a>
+  </footer>
+  <script>
+  (function(){
+    var order=['system','light','dark'], root=document.documentElement;
+    var labels={system:'🖥️ System',light:'☀️ Light',dark:'🌙 Dark'};
+    function apply(m){ if(m==='system'){root.removeAttribute('data-theme');}else{root.setAttribute('data-theme',m);} localStorage.setItem('theme',m); var el=document.getElementById('theme-label'); if(el)el.textContent=labels[m]; }
+    var mode=localStorage.getItem('theme')||'system'; apply(mode);
+    var btn=document.getElementById('theme-toggle');
+    if(btn) btn.addEventListener('click',function(){ mode=order[(order.indexOf(mode)+1)%order.length]; apply(mode); });
+  })();
+  </script>
+</body>
+</html>
