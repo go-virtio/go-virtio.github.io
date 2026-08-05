@@ -15,7 +15,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   name = "common"
   kind = "infra"
   type = "lib"
-  version = "v0.1.5"
+  version = "v0.1.6"
   ci = false
   blurb = "Transport-agnostic infrastructure: PCI capability walker, `ModernConfig` registers, split-virtqueue with descriptor chaining, device-class IDs, and the `Transport` interface every driver consumes."
 [[params.repos]]
