@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+{{/* Dark Reader repaints pages that already draw their own dark theme, as this one does: ask it to stand aside. */}}
+<meta name="darkreader-lock">
 <title>{{ .Site.Title }} — pure-Go, transport-agnostic virtio guest drivers</title>
 <meta name="description" content="Pure-Go guest virtio device-class drivers: net, rng, vsock, blk, console, balloon, input, sound, gpu (2D + virgl 3D + software rasterizer) and fs, plus Venus (Vulkan-over-virtio). One Transport interface, zero cgo, 100% coverage, validated on real devices and renderers.">
 <style>
