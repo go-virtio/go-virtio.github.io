@@ -85,8 +85,11 @@
     <p class="lead"><strong>Experimental: WebGPU over virtio.</strong> <code>gpu</code> also has the
       guest side of <code>webgpu-batch</code>, a private context type (capset 30) that carries
       <a href="https://github.com/go-gfx/webgpu">go-gfx/webgpu</a> command streams to a host that
-      replays them on WebGPU. No host implements it yet, so it is <strong>not yet validated</strong>;
-      see the <a href="https://github.com/go-virtio/gpu/blob/main/docs/WEBGPU.md">design</a>.</p>
+      replays them on WebGPU. The host is <a href="https://github.com/go-virtio/gpudev">gpudev</a>,
+      a virtio-gpu device model with a WebGPU backend. The guest driver has been <strong>validated
+      against it in a browser on a real GPU</strong>: 2D frames reach the canvas pixel for pixel, and
+      compute work runs on the GPU. It has not yet run under a hypervisor; see the
+      <a href="https://github.com/go-virtio/gpu/blob/main/docs/WEBGPU.md">design and validation table</a>.</p>
 
     <h2 class="section">Repositories</h2>
     <section class="grid">

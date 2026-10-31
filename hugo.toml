@@ -101,6 +101,13 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   ci = false
   blurb = "**Vulkan-over-virtio** (Venus). A `vk.xml`→Go serializer/generator plus a shared-memory ring transport; a clear-image runs end-to-end on a real renderer (`virgl_test_server --venus` + lavapipe), and on a Linux render-node host the guest maps the cleared `HOST3D|MAPPABLE` blob and reads the texels back — guest-side pixel readback included."
 [[params.repos]]
+  name = "gpudev"
+  kind = "3d"
+  type = "lib"
+  version = "unreleased"
+  ci = true
+  blurb = "The **host side** of virtio-gpu: a pure-Go device model (2D control queue, capset queries, **webgpu-batch** contexts), an in-process virtio-pci transport, and a **WebGPU backend** (go-gfx/webgpu). The go-virtio/gpu driver, unchanged, drives it in a browser: its framebuffer reaches the canvas texture pixel for pixel, and its compute work runs on the GPU."
+[[params.repos]]
   name = "validate"
   kind = "harness"
   type = "tool"
