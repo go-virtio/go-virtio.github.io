@@ -82,6 +82,12 @@
       real-hardware validation has caught <strong>9 encoding bugs that fake-device unit tests missed</strong>.
       No architecture-specific assembly: the same source builds for every Go target.</p>
 
+    <p class="lead"><strong>Experimental: WebGPU over virtio.</strong> <code>gpu</code> also has the
+      guest side of <code>webgpu-batch</code>, a private context type (capset 30) that carries
+      <a href="https://github.com/go-gfx/webgpu">go-gfx/webgpu</a> command streams to a host that
+      replays them on WebGPU. No host implements it yet, so it is <strong>not yet validated</strong>;
+      see the <a href="https://github.com/go-virtio/gpu/blob/main/docs/WEBGPU.md">design</a>.</p>
+
     <h2 class="section">Repositories</h2>
     <section class="grid">
       {{ range .Site.Params.repos }}
