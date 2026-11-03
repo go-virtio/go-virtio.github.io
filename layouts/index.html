@@ -88,7 +88,8 @@
       replays them on WebGPU. The host is <a href="https://github.com/go-virtio/gpudev">gpudev</a>,
       a virtio-gpu device model with a WebGPU backend. The guest driver has been <strong>validated
       against it in a browser on a real GPU</strong>: 2D frames reach the canvas pixel for pixel, and
-      compute work runs on the GPU. It has not yet run under a hypervisor; see the
+      compute work runs on the GPU. Since gpu v0.10.0 the capset (version 2) also tells the guest the
+      adapter's features and limits. It has not yet run under a hypervisor; see the
       <a href="https://github.com/go-virtio/gpu/blob/main/docs/WEBGPU.md">design and validation table</a>.</p>
 
     <h2 class="section">Repositories</h2>
