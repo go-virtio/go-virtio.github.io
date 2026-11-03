@@ -104,9 +104,9 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   name = "gpudev"
   kind = "3d"
   type = "lib"
-  version = "v0.1.0"
+  version = "v0.2.0"
   ci = true
-  blurb = "The **host side** of virtio-gpu: a pure-Go device model (2D control queue, capset queries, **webgpu-batch** contexts), an in-process virtio-pci transport, and a **WebGPU backend** (go-gfx/webgpu). The go-virtio/gpu driver, unchanged, drives it in a browser: its framebuffer reaches the canvas texture pixel for pixel, and its compute work runs on the GPU."
+  blurb = "The **host side** of virtio-gpu: a pure-Go device model (2D control queue, capset queries, **webgpu-batch** contexts, built on go-gfx/webgpu's `batch` package since v0.2.0), an in-process virtio-pci transport, and a **WebGPU backend** (go-gfx/webgpu). The go-virtio/gpu driver, unchanged, drives it in a browser: its framebuffer reaches the canvas texture pixel for pixel, and its compute work runs on the GPU."
 [[params.repos]]
   name = "validate"
   kind = "harness"
