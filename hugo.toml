@@ -83,7 +83,7 @@ disableKinds = ["taxonomy", "term", "RSS", "sitemap", "404"]
   name = "gpu"
   kind = "3d"
   type = "lib"
-  version = "v0.9.0"
+  version = "v0.10.0"
   ci = false
   blurb = "virtio-gpu (DID 0x1050). 2D framebuffer + **virgl 3D** (host-GPU clear / triangle / textured triangle) + a dependency-free pure-Go **software 3D rasterizer** (`gpu/soft3d`)."
 [[params.repos]]
