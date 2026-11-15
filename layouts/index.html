@@ -46,14 +46,12 @@
   <div class="hero"><div class="wrap">
     <div>
       <h1 class="head">go-virtio</h1>
-      <p class="sub">Pure-Go, transport-agnostic <strong>guest virtio drivers</strong> — one
-      <code>common.Transport</code> interface, every device class, and <strong>zero cgo</strong> on
+      <p class="sub">{{ if partial "mantra-on.html" . }}Go{{ else }}Pure-Go{{ end }}, transport-agnostic <strong>guest virtio drivers</strong> — one
+      <code>common.Transport</code> interface, every device class, and <strong>{{ if not (partial "mantra-on.html" $) }}zero cgo{{ end }}</strong> on
       a plain <code>go build</code>.</p>
-      <div class="cta">
-        <a class="btn btn-primary" href="https://github.com/go-virtio/.github/blob/main/profile/README.md">{{ partial "icons/book.html" . }}Documentation</a>
-        <a class="btn btn-ghost" href="https://github.com/go-virtio">{{ partial "icons/github.html" . }}GitHub</a>
-      </div>
-      <div class="trust">{{ if not (partial "mantra-on.html" $) }}<span class="pill">CGO_ENABLED=0</span>{{ end }}<span class="pill">transport-pluggable</span><span class="pill">net · rng · vsock · blk · console · balloon · input · sound · gpu · fs</span><span class="pill">2D + virgl 3D + Venus (Vulkan-over-virtio)</span><span class="pill">validated on real devices &amp; renderers</span><span class="pill">100% coverage</span></div>
+      {{/* [[params.cta]] in hugo.toml: the kit renders the row */}}
+      {{ partial "cta.html" . }}
+      <div class="trust">{{ if not (partial "mantra-on.html" $) }}{{ if not (partial "mantra-on.html" $) }}<span class="pill">CGO_ENABLED=0</span>{{ end }}{{ end }}<span class="pill">transport-pluggable</span><span class="pill">net · rng · vsock · blk · console · balloon · input · sound · gpu · fs</span><span class="pill">2D + virgl 3D + Venus (Vulkan-over-virtio)</span><span class="pill">validated on real devices &amp; renderers</span><span class="pill">100% coverage</span></div>
     </div>
     {{ partial "hero-carousel.html" . }}
   </div></div>
